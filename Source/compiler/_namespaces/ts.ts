@@ -1,3 +1,6 @@
+import * as moduleSpecifiers from "./ts.moduleSpecifiers";
+import * as performance from "./ts.performance";
+
 /* Generated file to emulate the ts namespace. */
 
 export * from "../corePublic";
@@ -71,7 +74,7 @@ export * from "../watch";
 export * from "../watchPublic";
 export * from "../tsbuild";
 export * from "../tsbuildPublic";
-import * as moduleSpecifiers from "./ts.moduleSpecifiers";
+
 export { moduleSpecifiers };
-import * as performance from "./ts.performance";
+
 export { performance };

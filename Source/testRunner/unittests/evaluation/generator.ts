@@ -2,9 +2,9 @@ import * as evaluator from "../../_namespaces/evaluator";
 import * as ts from "../../_namespaces/ts";
 
 describe("unittests:: evaluation:: generatorEvaluation", () => {
-    it("throw before start (es5)", () => {
-        const { gen, output } = evaluator.evaluateTypeScript(
-            `
+	it("throw before start (es5)", () => {
+		const { gen, output } = evaluator.evaluateTypeScript(
+			`
             export const output: string[] = [];
             export function * gen() {
                 output.push("start");
@@ -12,18 +12,18 @@ describe("unittests:: evaluation:: generatorEvaluation", () => {
                 output.push("end");
             }
         `,
-            { target: ts.ScriptTarget.ES5 },
-        );
+			{ target: ts.ScriptTarget.ES5 },
+		);
 
-        const g = gen();
-        const e = new Error();
-        assert.throws(() => g.throw(e), e);
-        assert.deepEqual(g.next(), { value: undefined, done: true });
-        assert.deepEqual(output, []);
-    });
-    it("return before start (es5)", () => {
-        const { gen, output } = evaluator.evaluateTypeScript(
-            `
+		const g = gen();
+		const e = new Error();
+		assert.throws(() => g.throw(e), e);
+		assert.deepEqual(g.next(), { value: undefined, done: true });
+		assert.deepEqual(output, []);
+	});
+	it("return before start (es5)", () => {
+		const { gen, output } = evaluator.evaluateTypeScript(
+			`
             export const output: string[] = [];
             export function * gen() {
                 output.push("start");
@@ -31,12 +31,12 @@ describe("unittests:: evaluation:: generatorEvaluation", () => {
                 output.push("end");
             }
         `,
-            { target: ts.ScriptTarget.ES5 },
-        );
+			{ target: ts.ScriptTarget.ES5 },
+		);
 
-        const g = gen();
-        assert.deepEqual(g.return(2), { value: 2, done: true });
-        assert.deepEqual(g.next(), { value: undefined, done: true });
-        assert.deepEqual(output, []);
-    });
+		const g = gen();
+		assert.deepEqual(g.return(2), { value: 2, done: true });
+		assert.deepEqual(g.next(), { value: undefined, done: true });
+		assert.deepEqual(output, []);
+	});
 });

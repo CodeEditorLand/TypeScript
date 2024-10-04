@@ -1,17 +1,14 @@
-import {
-    Diagnostic,
-    WriteFileCallbackData,
-} from "./_namespaces/ts";
+import { Diagnostic, WriteFileCallbackData } from "./_namespaces/ts";
 
 export interface EmitOutput {
-    outputFiles: OutputFile[];
-    emitSkipped: boolean;
-    /** @internal */ diagnostics: readonly Diagnostic[];
+	outputFiles: OutputFile[];
+	emitSkipped: boolean;
+	/** @internal */ diagnostics: readonly Diagnostic[];
 }
 
 export interface OutputFile {
-    name: string;
-    writeByteOrderMark: boolean;
-    text: string;
-    /** @internal */ data?: WriteFileCallbackData;
+	name: string;
+	writeByteOrderMark: boolean;
+	text: string;
+	/** @internal */ data?: WriteFileCallbackData;
 }

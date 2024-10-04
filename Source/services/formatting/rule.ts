@@ -1,18 +1,13 @@
-import {
-    emptyArray,
-    SyntaxKind,
-} from "../_namespaces/ts";
-import {
-    FormattingContext,
-} from "../_namespaces/ts.formatting";
+import { emptyArray, SyntaxKind } from "../_namespaces/ts";
+import { FormattingContext } from "../_namespaces/ts.formatting";
 
 /** @internal */
 export interface Rule {
-    // Used for debugging to identify each rule based on the property name it's assigned to.
-    readonly debugName: string;
-    readonly context: readonly ContextPredicate[];
-    readonly action: RuleAction;
-    readonly flags: RuleFlags;
+	// Used for debugging to identify each rule based on the property name it's assigned to.
+	readonly debugName: string;
+	readonly context: readonly ContextPredicate[];
+	readonly action: RuleAction;
+	readonly flags: RuleFlags;
 }
 
 /** @internal */
@@ -23,28 +18,28 @@ export const anyContext: readonly ContextPredicate[] = emptyArray;
 // dprint-ignore
 /** @internal */
 export const enum RuleAction {
-    None                       = 0,
-    StopProcessingSpaceActions = 1 << 0,
-    StopProcessingTokenActions = 1 << 1,
-    InsertSpace                = 1 << 2,
-    InsertNewLine              = 1 << 3,
-    DeleteSpace                = 1 << 4,
-    DeleteToken                = 1 << 5,
-    InsertTrailingSemicolon    = 1 << 6,
+	None = 0,
+	StopProcessingSpaceActions = 1 << 0,
+	StopProcessingTokenActions = 1 << 1,
+	InsertSpace = 1 << 2,
+	InsertNewLine = 1 << 3,
+	DeleteSpace = 1 << 4,
+	DeleteToken = 1 << 5,
+	InsertTrailingSemicolon = 1 << 6,
 
-    StopAction = StopProcessingSpaceActions | StopProcessingTokenActions,
-    ModifySpaceAction = InsertSpace | InsertNewLine | DeleteSpace,
-    ModifyTokenAction = DeleteToken | InsertTrailingSemicolon,
+	StopAction = StopProcessingSpaceActions | StopProcessingTokenActions,
+	ModifySpaceAction = InsertSpace | InsertNewLine | DeleteSpace,
+	ModifyTokenAction = DeleteToken | InsertTrailingSemicolon,
 }
 
 /** @internal */
 export const enum RuleFlags {
-    None,
-    CanDeleteNewLines,
+	None,
+	CanDeleteNewLines,
 }
 
 /** @internal */
 export interface TokenRange {
-    readonly tokens: readonly SyntaxKind[];
-    readonly isSpecific: boolean;
+	readonly tokens: readonly SyntaxKind[];
+	readonly isSpecific: boolean;
 }

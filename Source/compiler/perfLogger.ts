@@ -1,39 +1,40 @@
 /** @internal */
 export interface PerfLogger {
-    logEvent(msg: string): void;
-    logErrEvent(msg: string): void;
-    logPerfEvent(msg: string): void;
-    logInfoEvent(msg: string): void;
-    logStartCommand(command: string, msg: string): void;
-    logStopCommand(command: string, msg: string): void;
-    logStartUpdateProgram(msg: string): void;
-    logStopUpdateProgram(msg: string): void;
-    logStartUpdateGraph(): void;
-    logStopUpdateGraph(): void;
-    logStartResolveModule(name: string): void;
-    logStopResolveModule(success: string): void;
-    logStartParseSourceFile(filename: string): void;
-    logStopParseSourceFile(): void;
-    logStartReadFile(filename: string): void;
-    logStopReadFile(): void;
-    logStartBindFile(filename: string): void;
-    logStopBindFile(): void;
-    logStartScheduledOperation(operationId: string): void;
-    logStopScheduledOperation(): void;
+	logEvent(msg: string): void;
+	logErrEvent(msg: string): void;
+	logPerfEvent(msg: string): void;
+	logInfoEvent(msg: string): void;
+	logStartCommand(command: string, msg: string): void;
+	logStopCommand(command: string, msg: string): void;
+	logStartUpdateProgram(msg: string): void;
+	logStopUpdateProgram(msg: string): void;
+	logStartUpdateGraph(): void;
+	logStopUpdateGraph(): void;
+	logStartResolveModule(name: string): void;
+	logStopResolveModule(success: string): void;
+	logStartParseSourceFile(filename: string): void;
+	logStopParseSourceFile(): void;
+	logStartReadFile(filename: string): void;
+	logStopReadFile(): void;
+	logStartBindFile(filename: string): void;
+	logStopBindFile(): void;
+	logStartScheduledOperation(operationId: string): void;
+	logStopScheduledOperation(): void;
 }
 
 // Load optional module to enable Event Tracing for Windows
 // See https://github.com/microsoft/typescript-etw for more information
 let etwModule: typeof import("@microsoft/typescript-etw") | undefined;
 try {
-    const etwModulePath = process.env.TS_ETW_MODULE_PATH ?? "./node_modules/@microsoft/typescript-etw";
+	const etwModulePath =
+		process.env.TS_ETW_MODULE_PATH ??
+		"./node_modules/@microsoft/typescript-etw";
 
-    // require() will throw an exception if the module is not found
-    // It may also return undefined if not installed properly
-    etwModule = require(etwModulePath);
-}
-catch (e) {
-    etwModule = undefined;
+	// require() will throw an exception if the module is not found
+	// It may also return undefined if not installed properly
+	etwModule = require(etwModulePath);
+} catch (e) {
+	etwModule = undefined;
 }
 
 /**
@@ -41,4 +42,6 @@ catch (e) {
  *
  * @internal
  */
-export const perfLogger: PerfLogger | undefined = etwModule?.logEvent ? etwModule : undefined;
+export const perfLogger: PerfLogger | undefined = etwModule?.logEvent
+	? etwModule
+	: undefined;

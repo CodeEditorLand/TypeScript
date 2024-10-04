@@ -1,3 +1,24 @@
+import * as BreakpointResolver from "./ts.BreakpointResolver";
+import * as CallHierarchy from "./ts.CallHierarchy";
+import * as classifier from "./ts.classifier";
+import * as codefix from "./ts.codefix";
+import * as Completions from "./ts.Completions";
+import * as FindAllReferences from "./ts.FindAllReferences";
+import * as formatting from "./ts.formatting";
+import * as GoToDefinition from "./ts.GoToDefinition";
+import * as InlayHints from "./ts.InlayHints";
+import * as JsDoc from "./ts.JsDoc";
+import * as NavigateTo from "./ts.NavigateTo";
+import * as NavigationBar from "./ts.NavigationBar";
+import * as OrganizeImports from "./ts.OrganizeImports";
+import * as OutliningElementsCollector from "./ts.OutliningElementsCollector";
+import * as refactor from "./ts.refactor";
+import * as Rename from "./ts.Rename";
+import * as SignatureHelp from "./ts.SignatureHelp";
+import * as SmartSelectionRange from "./ts.SmartSelectionRange";
+import * as SymbolDisplay from "./ts.SymbolDisplay";
+import * as textChanges from "./ts.textChanges";
+
 /* Generated file to emulate the ts namespace. */
 
 export * from "../../compiler/_namespaces/ts";
@@ -16,43 +37,43 @@ export * from "../suggestionDiagnostics";
 export * from "../transpile";
 export * from "../services";
 export * from "../transform";
-import * as BreakpointResolver from "./ts.BreakpointResolver";
+
 export { BreakpointResolver };
-import * as CallHierarchy from "./ts.CallHierarchy";
+
 export { CallHierarchy };
-import * as classifier from "./ts.classifier";
+
 export { classifier };
-import * as codefix from "./ts.codefix";
+
 export { codefix };
-import * as Completions from "./ts.Completions";
+
 export { Completions };
-import * as FindAllReferences from "./ts.FindAllReferences";
+
 export { FindAllReferences };
-import * as GoToDefinition from "./ts.GoToDefinition";
+
 export { GoToDefinition };
-import * as InlayHints from "./ts.InlayHints";
+
 export { InlayHints };
-import * as JsDoc from "./ts.JsDoc";
+
 export { JsDoc };
-import * as NavigateTo from "./ts.NavigateTo";
+
 export { NavigateTo };
-import * as NavigationBar from "./ts.NavigationBar";
+
 export { NavigationBar };
-import * as OrganizeImports from "./ts.OrganizeImports";
+
 export { OrganizeImports };
-import * as OutliningElementsCollector from "./ts.OutliningElementsCollector";
+
 export { OutliningElementsCollector };
-import * as refactor from "./ts.refactor";
+
 export { refactor };
-import * as Rename from "./ts.Rename";
+
 export { Rename };
-import * as SignatureHelp from "./ts.SignatureHelp";
+
 export { SignatureHelp };
-import * as SmartSelectionRange from "./ts.SmartSelectionRange";
+
 export { SmartSelectionRange };
-import * as SymbolDisplay from "./ts.SymbolDisplay";
+
 export { SymbolDisplay };
-import * as textChanges from "./ts.textChanges";
+
 export { textChanges };
-import * as formatting from "./ts.formatting";
+
 export { formatting };

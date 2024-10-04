@@ -4,7 +4,7 @@
  * @internal
  */
 export interface RefactorErrorInfo {
-    error: string;
+	error: string;
 }
 
 /**
@@ -13,7 +13,7 @@ export interface RefactorErrorInfo {
  * @internal
  */
 export function isRefactorErrorInfo(info: unknown): info is RefactorErrorInfo {
-    return (info as RefactorErrorInfo).error !== undefined;
+	return (info as RefactorErrorInfo).error !== undefined;
 }
 
 /**
@@ -22,7 +22,10 @@ export function isRefactorErrorInfo(info: unknown): info is RefactorErrorInfo {
  *
  * @internal
  */
-export function refactorKindBeginsWith(known: string, requested: string | undefined): boolean {
-    if (!requested) return true;
-    return known.substr(0, requested.length) === requested;
+export function refactorKindBeginsWith(
+	known: string,
+	requested: string | undefined,
+): boolean {
+	if (!requested) return true;
+	return known.substr(0, requested.length) === requested;
 }

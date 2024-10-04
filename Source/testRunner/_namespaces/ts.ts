@@ -1,3 +1,5 @@
+import * as server from "./ts.server";
+
 /* Generated file to emulate the ts namespace. */
 
 export * from "../../compiler/_namespaces/ts";
@@ -8,5 +10,5 @@ export * from "../../server/_namespaces/ts";
 export * from "../../typingsInstallerCore/_namespaces/ts";
 export * from "../../deprecatedCompat/_namespaces/ts";
 export * from "../../harness/_namespaces/ts";
-import * as server from "./ts.server";
+
 export { server };

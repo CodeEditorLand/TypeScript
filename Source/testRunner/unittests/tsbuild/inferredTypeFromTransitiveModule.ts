@@ -1,24 +1,14 @@
-import {
-    dedent,
-} from "../../_namespaces/Utils";
+import { dedent } from "../../_namespaces/Utils";
 import * as vfs from "../../_namespaces/vfs";
-import {
-    jsonToReadableText,
-} from "../helpers";
-import {
-    verifyTsc,
-} from "../helpers/tsc";
-import {
-    appendText,
-    loadProjectFromFiles,
-    replaceText,
-} from "../helpers/vfs";
+import { jsonToReadableText } from "../helpers";
+import { verifyTsc } from "../helpers/tsc";
+import { appendText, loadProjectFromFiles, replaceText } from "../helpers/vfs";
 
 describe("unittests:: tsbuild:: inferredTypeFromTransitiveModule::", () => {
-    let projFs: vfs.FileSystem;
-    before(() => {
-        projFs = loadProjectFromFiles({
-            "/src/bar.ts": dedent`
+	let projFs: vfs.FileSystem;
+	before(() => {
+		projFs = loadProjectFromFiles({
+			"/src/bar.ts": dedent`
                 interface RawAction {
                     (...args: any[]): Promise<any> | void;
                 }
@@ -29,7 +19,7 @@ describe("unittests:: tsbuild:: inferredTypeFromTransitiveModule::", () => {
                 export default foo()(function foobar(param: string): void {
                 });
             `,
-            "/src/bundling.ts": dedent`
+			"/src/bundling.ts": dedent`
                 export class LazyModule<TModule> {
                     constructor(private importCallback: () => Promise<TModule>) {}
                 }
@@ -42,7 +32,7 @@ describe("unittests:: tsbuild:: inferredTypeFromTransitiveModule::", () => {
                     }
                 }
             `,
-            "/src/global.d.ts": dedent`
+			"/src/global.d.ts": dedent`
                 interface PromiseConstructor {
                     new <T>(): Promise<T>;
                 }
@@ -50,109 +40,122 @@ describe("unittests:: tsbuild:: inferredTypeFromTransitiveModule::", () => {
                 interface Promise<T> {
                 }
             `,
-            "/src/index.ts": dedent`
+			"/src/index.ts": dedent`
                 import { LazyAction, LazyModule } from './bundling';
                 const lazyModule = new LazyModule(() =>
                     import('./lazyIndex')
                 );
                 export const lazyBar = new LazyAction(lazyModule, m => m.bar);
             `,
-            "/src/lazyIndex.ts": dedent`
+			"/src/lazyIndex.ts": dedent`
                 export { default as bar } from './bar';
             `,
-            "/src/tsconfig.json": jsonToReadableText({
-                compilerOptions: {
-                    target: "es5",
-                    declaration: true,
-                    outDir: "obj",
-                    incremental: true,
-                },
-            }),
-        });
-    });
-    after(() => {
-        projFs = undefined!;
-    });
+			"/src/tsconfig.json": jsonToReadableText({
+				compilerOptions: {
+					target: "es5",
+					declaration: true,
+					outDir: "obj",
+					incremental: true,
+				},
+			}),
+		});
+	});
+	after(() => {
+		projFs = undefined!;
+	});
 
-    verifyTsc({
-        scenario: "inferredTypeFromTransitiveModule",
-        subScenario: "inferred type from transitive module",
-        fs: () => projFs,
-        commandLineArgs: ["--b", "/src", "--verbose"],
-        edits: [
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParam,
-            },
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParamBack,
-            },
-        ],
-    });
+	verifyTsc({
+		scenario: "inferredTypeFromTransitiveModule",
+		subScenario: "inferred type from transitive module",
+		fs: () => projFs,
+		commandLineArgs: ["--b", "/src", "--verbose"],
+		edits: [
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParam,
+			},
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParamBack,
+			},
+		],
+	});
 
-    verifyTsc({
-        subScenario: "inferred type from transitive module with isolatedModules",
-        fs: () => projFs,
-        scenario: "inferredTypeFromTransitiveModule",
-        commandLineArgs: ["--b", "/src", "--verbose"],
-        modifyFs: changeToIsolatedModules,
-        edits: [
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParam,
-            },
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParamBack,
-            },
-        ],
-    });
+	verifyTsc({
+		subScenario:
+			"inferred type from transitive module with isolatedModules",
+		fs: () => projFs,
+		scenario: "inferredTypeFromTransitiveModule",
+		commandLineArgs: ["--b", "/src", "--verbose"],
+		modifyFs: changeToIsolatedModules,
+		edits: [
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParam,
+			},
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParamBack,
+			},
+		],
+	});
 
-    verifyTsc({
-        scenario: "inferredTypeFromTransitiveModule",
-        subScenario: "reports errors in files affected by change in signature with isolatedModules",
-        fs: () => projFs,
-        commandLineArgs: ["--b", "/src", "--verbose"],
-        modifyFs: fs => {
-            changeToIsolatedModules(fs);
-            appendText(
-                fs,
-                "/src/lazyIndex.ts",
-                `
+	verifyTsc({
+		scenario: "inferredTypeFromTransitiveModule",
+		subScenario:
+			"reports errors in files affected by change in signature with isolatedModules",
+		fs: () => projFs,
+		commandLineArgs: ["--b", "/src", "--verbose"],
+		modifyFs: (fs) => {
+			changeToIsolatedModules(fs);
+			appendText(
+				fs,
+				"/src/lazyIndex.ts",
+				`
 import { default as bar } from './bar';
 bar("hello");`,
-            );
-        },
-        edits: [
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParam,
-            },
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParamBack,
-            },
-            {
-                caption: "incremental-declaration-changes",
-                edit: changeBarParam,
-            },
-            {
-                caption: "Fix Error",
-                edit: fs => replaceText(fs, "/src/lazyIndex.ts", `bar("hello")`, "bar()"),
-            },
-        ],
-    });
+			);
+		},
+		edits: [
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParam,
+			},
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParamBack,
+			},
+			{
+				caption: "incremental-declaration-changes",
+				edit: changeBarParam,
+			},
+			{
+				caption: "Fix Error",
+				edit: (fs) =>
+					replaceText(
+						fs,
+						"/src/lazyIndex.ts",
+						`bar("hello")`,
+						"bar()",
+					),
+			},
+		],
+	});
 });
 
 function changeToIsolatedModules(fs: vfs.FileSystem) {
-    replaceText(fs, "/src/tsconfig.json", `"incremental": true`, `"incremental": true, "isolatedModules": true`);
+	replaceText(
+		fs,
+		"/src/tsconfig.json",
+		`"incremental": true`,
+		`"incremental": true, "isolatedModules": true`,
+	);
 }
 
 function changeBarParam(fs: vfs.FileSystem) {
-    replaceText(fs, "/src/bar.ts", "param: string", "");
+	replaceText(fs, "/src/bar.ts", "param: string", "");
 }
 
 function changeBarParamBack(fs: vfs.FileSystem) {
-    replaceText(fs, "/src/bar.ts", "foobar()", "foobar(param: string)");
+	replaceText(fs, "/src/bar.ts", "foobar()", "foobar(param: string)");
 }

@@ -1,9 +1,9 @@
 import * as evaluator from "../../_namespaces/evaluator";
 
 describe("unittests:: evaluation:: asyncArrowEvaluation", () => {
-    // https://github.com/Microsoft/TypeScript/issues/24722
-    it("this capture (es5)", async () => {
-        const result = evaluator.evaluateTypeScript(`
+	// https://github.com/Microsoft/TypeScript/issues/24722
+	it("this capture (es5)", async () => {
+		const result = evaluator.evaluateTypeScript(`
         export class A {
             b = async (...args: any[]) => {
                 await Promise.resolve();
@@ -14,7 +14,7 @@ describe("unittests:: evaluation:: asyncArrowEvaluation", () => {
         export async function main() {
             await new A().b();
         }`);
-        await result.main();
-        assert.instanceOf(result.output[0].a(), result.A);
-    });
+		await result.main();
+		assert.instanceOf(result.output[0].a(), result.A);
+	});
 });
