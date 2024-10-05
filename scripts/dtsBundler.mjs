@@ -5,15 +5,13 @@
  * bundle as namespaces again, even though the project is modules.
  */
 
-import assert, {
-    fail,
-} from "assert";
+import assert, { fail } from "assert";
 import cp from "child_process";
 import fs from "fs";
-import minimist from "minimist";
 import path from "path";
-import ts from "typescript";
 import url from "url";
+import minimist from "minimist";
+import ts from "typescript";
 
 const __filename = url.fileURLToPath(new URL(import.meta.url));
 const __dirname = path.dirname(__filename);
@@ -23,7 +21,7 @@ const __dirname = path.dirname(__filename);
 const dotDts = ".d.ts";
 
 const options = minimist(process.argv.slice(2), {
-    string: ["project", "entrypoint", "output"],
+	string: ["project", "entrypoint", "output"],
 });
 
 const entrypoint = options.entrypoint;
@@ -33,7 +31,8 @@ assert(typeof entrypoint === "string" && entrypoint);
 assert(typeof output === "string" && output);
 assert(output.endsWith(dotDts));
 
-const internalOutput = output.substring(0, output.length - dotDts.length) + ".internal" + dotDts;
+const internalOutput =
+	output.substring(0, output.length - dotDts.length) + ".internal" + dotDts;
 
 console.log(`Bundling ${entrypoint} to ${output} and ${internalOutput}`);
 
@@ -45,12 +44,21 @@ const newLine = newLineKind === ts.NewLineKind.LineFeed ? "\n" : "\r\n";
  * @returns {ts.VariableStatement}
  */
 function getParentVariableStatement(node) {
-    const declarationList = node.parent;
-    assert(ts.isVariableDeclarationList(declarationList), `expected VariableDeclarationList at ${nodeToLocation(node)}`);
-    assert(declarationList.declarations.length === 1, `expected VariableDeclarationList of length 1 at ${nodeToLocation(node)}`);
-    const variableStatement = declarationList.parent;
-    assert(ts.isVariableStatement(variableStatement), `expected VariableStatement at ${nodeToLocation(node)}`);
-    return variableStatement;
+	const declarationList = node.parent;
+	assert(
+		ts.isVariableDeclarationList(declarationList),
+		`expected VariableDeclarationList at ${nodeToLocation(node)}`,
+	);
+	assert(
+		declarationList.declarations.length === 1,
+		`expected VariableDeclarationList of length 1 at ${nodeToLocation(node)}`,
+	);
+	const variableStatement = declarationList.parent;
+	assert(
+		ts.isVariableStatement(variableStatement),
+		`expected VariableStatement at ${nodeToLocation(node)}`,
+	);
+	return variableStatement;
 }
 
 /**
@@ -58,13 +66,12 @@ function getParentVariableStatement(node) {
  * @returns {ts.Statement | undefined}
  */
 function getDeclarationStatement(node) {
-    if (ts.isVariableDeclaration(node)) {
-        return getParentVariableStatement(node);
-    }
-    else if (ts.isDeclarationStatement(node)) {
-        return node;
-    }
-    return undefined;
+	if (ts.isVariableDeclaration(node)) {
+		return getParentVariableStatement(node);
+	} else if (ts.isDeclarationStatement(node)) {
+		return node;
+	}
+	return undefined;
 }
 
 const program = ts.createProgram([entrypoint], { target: ts.ScriptTarget.ES5 });
@@ -81,14 +88,14 @@ const printer = /** @type {any} */ (ts.createPrinter({ newLine: newLineKind }));
 /** @type {{ writeComment(s: string): void; getText(): string; clear(): void }} */
 const writer = /** @type {any} */ (ts).createTextWriter("\n");
 const originalWriteComment = writer.writeComment.bind(writer);
-writer.writeComment = s => {
-    // Hack; undo https://github.com/microsoft/TypeScript/pull/50097
-    // We printNode directly, so we get all of the original source comments.
-    // If we were using actual declaration emit instead, this wouldn't be needed.
-    if (s.startsWith("//")) {
-        return;
-    }
-    originalWriteComment(s);
+writer.writeComment = (s) => {
+	// Hack; undo https://github.com/microsoft/TypeScript/pull/50097
+	// We printNode directly, so we get all of the original source comments.
+	// If we were using actual declaration emit instead, this wouldn't be needed.
+	if (s.startsWith("//")) {
+		return;
+	}
+	originalWriteComment(s);
 };
 
 /**
@@ -96,10 +103,10 @@ writer.writeComment = s => {
  * @param {ts.SourceFile} sourceFile
  */
 function printNode(node, sourceFile) {
-    printer.writeNode(ts.EmitHint.Unspecified, node, sourceFile, writer);
-    const text = writer.getText();
-    writer.clear();
-    return text;
+	printer.writeNode(ts.EmitHint.Unspecified, node, sourceFile, writer);
+	const text = writer.getText();
+	writer.clear();
+	return text;
 }
 
 /** @type {string[]} */
@@ -111,20 +118,20 @@ const indent = "    ";
 let currentIndent = "";
 
 function increaseIndent() {
-    currentIndent += indent;
+	currentIndent += indent;
 }
 
 function decreaseIndent() {
-    currentIndent = currentIndent.slice(indent.length);
+	currentIndent = currentIndent.slice(indent.length);
 }
 
 /**
  * @enum {number}
  */
 const WriteTarget = {
-    Public: 1 << 0,
-    Internal: 1 << 1,
-    Both: (1 << 0) | (1 << 1),
+	Public: 1 << 0,
+	Internal: 1 << 1,
+	Both: (1 << 0) | (1 << 1),
 };
 
 /**
@@ -132,18 +139,23 @@ const WriteTarget = {
  * @param {WriteTarget} target
  */
 function write(s, target) {
-    if (!target) {
-        return;
-    }
+	if (!target) {
+		return;
+	}
 
-    const toPush = !s ? [""] : s.split(/\r?\n/).filter(line => line).map(line => (currentIndent + line).trimEnd());
+	const toPush = !s
+		? [""]
+		: s
+				.split(/\r?\n/)
+				.filter((line) => line)
+				.map((line) => (currentIndent + line).trimEnd());
 
-    if (target & WriteTarget.Public) {
-        publicLines.push(...toPush);
-    }
-    if (target & WriteTarget.Internal) {
-        internalLines.push(...toPush);
-    }
+	if (target & WriteTarget.Public) {
+		publicLines.push(...toPush);
+	}
+	if (target & WriteTarget.Internal) {
+		internalLines.push(...toPush);
+	}
 }
 
 /**
@@ -152,7 +164,7 @@ function write(s, target) {
  * @param {WriteTarget} target
  */
 function writeNode(node, sourceFile, target) {
-    write(printNode(node, sourceFile), target);
+	write(printNode(node, sourceFile), target);
 }
 
 /** @type {Map<ts.Symbol, boolean>} */
@@ -163,53 +175,56 @@ const containsPublicAPICache = new Map();
  * @returns {boolean}
  */
 function containsPublicAPI(symbol) {
-    const cached = containsPublicAPICache.get(symbol);
-    if (cached !== undefined) {
-        return cached;
-    }
+	const cached = containsPublicAPICache.get(symbol);
+	if (cached !== undefined) {
+		return cached;
+	}
 
-    const result = containsPublicAPIWorker();
-    containsPublicAPICache.set(symbol, result);
-    return result;
+	const result = containsPublicAPIWorker();
+	containsPublicAPICache.set(symbol, result);
+	return result;
 
-    function containsPublicAPIWorker() {
-        if (!symbol.declarations?.length) {
-            return false;
-        }
+	function containsPublicAPIWorker() {
+		if (!symbol.declarations?.length) {
+			return false;
+		}
 
-        if (symbol.flags & ts.SymbolFlags.Alias) {
-            const resolved = typeChecker.getAliasedSymbol(symbol);
-            return containsPublicAPI(resolved);
-        }
+		if (symbol.flags & ts.SymbolFlags.Alias) {
+			const resolved = typeChecker.getAliasedSymbol(symbol);
+			return containsPublicAPI(resolved);
+		}
 
-        // Namespace barrel; actual namespaces are checked below.
-        if (symbol.flags & ts.SymbolFlags.ValueModule && symbol.valueDeclaration?.kind === ts.SyntaxKind.SourceFile) {
-            for (const me of typeChecker.getExportsOfModule(symbol)) {
-                if (containsPublicAPI(me)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+		// Namespace barrel; actual namespaces are checked below.
+		if (
+			symbol.flags & ts.SymbolFlags.ValueModule &&
+			symbol.valueDeclaration?.kind === ts.SyntaxKind.SourceFile
+		) {
+			for (const me of typeChecker.getExportsOfModule(symbol)) {
+				if (containsPublicAPI(me)) {
+					return true;
+				}
+			}
+			return false;
+		}
 
-        for (const decl of symbol.declarations) {
-            const statement = getDeclarationStatement(decl);
-            if (statement && !ts.isInternalDeclaration(statement)) {
-                return true;
-            }
-        }
+		for (const decl of symbol.declarations) {
+			const statement = getDeclarationStatement(decl);
+			if (statement && !ts.isInternalDeclaration(statement)) {
+				return true;
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 }
 
 /**
  * @param {ts.Node} node
  */
 function nodeToLocation(node) {
-    const sourceFile = node.getSourceFile();
-    const lc = sourceFile.getLineAndCharacterOfPosition(node.pos);
-    return `${sourceFile.fileName}:${lc.line + 1}:${lc.character + 1}`;
+	const sourceFile = node.getSourceFile();
+	const lc = sourceFile.getLineAndCharacterOfPosition(node.pos);
+	return `${sourceFile.fileName}:${lc.line + 1}:${lc.character + 1}`;
 }
 
 /**
@@ -217,13 +232,13 @@ function nodeToLocation(node) {
  * @returns {ts.Node | undefined}
  */
 function removeDeclareConstExport(node) {
-    switch (node.kind) {
-        case ts.SyntaxKind.DeclareKeyword: // No need to emit this in d.ts files.
-        case ts.SyntaxKind.ConstKeyword: // Remove const from const enums.
-        case ts.SyntaxKind.ExportKeyword: // No export modifier; we are already in the namespace.
-            return undefined;
-    }
-    return node;
+	switch (node.kind) {
+		case ts.SyntaxKind.DeclareKeyword: // No need to emit this in d.ts files.
+		case ts.SyntaxKind.ConstKeyword: // Remove const from const enums.
+		case ts.SyntaxKind.ExportKeyword: // No export modifier; we are already in the namespace.
+			return undefined;
+	}
+	return node;
 }
 
 /** @type {Map<string, ts.Symbol>[]} */
@@ -233,20 +248,32 @@ const scopeStack = [];
  * @param {string} name
  */
 function findInScope(name) {
-    for (let i = scopeStack.length - 1; i >= 0; i--) {
-        const scope = scopeStack[i];
-        const symbol = scope.get(name);
-        if (symbol) {
-            return symbol;
-        }
-    }
-    return undefined;
+	for (let i = scopeStack.length - 1; i >= 0; i--) {
+		const scope = scopeStack[i];
+		const symbol = scope.get(name);
+		if (symbol) {
+			return symbol;
+		}
+	}
+	return undefined;
 }
 
 /** @type {(symbol: ts.Symbol | undefined, excludes?: ts.SymbolFlags) => boolean} */
-function isNonLocalAlias(symbol, excludes = ts.SymbolFlags.Value | ts.SymbolFlags.Type | ts.SymbolFlags.Namespace) {
-    if (!symbol) return false;
-    return (symbol.flags & (ts.SymbolFlags.Alias | excludes)) === ts.SymbolFlags.Alias || !!(symbol.flags & ts.SymbolFlags.Alias && symbol.flags & ts.SymbolFlags.Assignment);
+function isNonLocalAlias(
+	symbol,
+	excludes = ts.SymbolFlags.Value |
+		ts.SymbolFlags.Type |
+		ts.SymbolFlags.Namespace,
+) {
+	if (!symbol) return false;
+	return (
+		(symbol.flags & (ts.SymbolFlags.Alias | excludes)) ===
+			ts.SymbolFlags.Alias ||
+		!!(
+			symbol.flags & ts.SymbolFlags.Alias &&
+			symbol.flags & ts.SymbolFlags.Assignment
+		)
+	);
 }
 
 /**
@@ -254,7 +281,9 @@ function isNonLocalAlias(symbol, excludes = ts.SymbolFlags.Value | ts.SymbolFlag
  * @param {boolean | undefined} [dontResolveAlias]
  */
 function resolveSymbol(symbol, dontResolveAlias = undefined) {
-    return !dontResolveAlias && isNonLocalAlias(symbol) ? typeChecker.getAliasedSymbol(symbol) : symbol;
+	return !dontResolveAlias && isNonLocalAlias(symbol)
+		? typeChecker.getAliasedSymbol(symbol)
+		: symbol;
 }
 
 /**
@@ -262,7 +291,7 @@ function resolveSymbol(symbol, dontResolveAlias = undefined) {
  * @returns {ts.Symbol}
  */
 function getMergedSymbol(symbol) {
-    return typeChecker.getMergedSymbol(symbol);
+	return typeChecker.getMergedSymbol(symbol);
 }
 
 /**
@@ -270,57 +299,69 @@ function getMergedSymbol(symbol) {
  * @param {ts.Symbol} s2
  */
 function symbolsConflict(s1, s2) {
-    // See getSymbolIfSameReference in checker.ts
-    s1 = getMergedSymbol(resolveSymbol(getMergedSymbol(s1)));
-    s2 = getMergedSymbol(resolveSymbol(getMergedSymbol(s2)));
-    if (s1 === s2) {
-        return false;
-    }
+	// See getSymbolIfSameReference in checker.ts
+	s1 = getMergedSymbol(resolveSymbol(getMergedSymbol(s1)));
+	s2 = getMergedSymbol(resolveSymbol(getMergedSymbol(s2)));
+	if (s1 === s2) {
+		return false;
+	}
 
-    const s1Flags = s1.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Value);
-    const s2Flags = s2.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Value);
+	const s1Flags = s1.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Value);
+	const s2Flags = s2.flags & (ts.SymbolFlags.Type | ts.SymbolFlags.Value);
 
-    // If the two symbols differ by type/value space, ignore.
-    if (!(s1Flags & s2Flags)) {
-        return false;
-    }
+	// If the two symbols differ by type/value space, ignore.
+	if (!(s1Flags & s2Flags)) {
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 /**
  * @param {ts.Statement} decl
  */
 function verifyMatchingSymbols(decl) {
-    ts.visitEachChild(decl, /** @type {(node: ts.Node) => ts.Node} */ function visit(node) {
-        if (ts.isIdentifier(node) && ts.isPartOfTypeNode(node)) {
-            if (ts.isQualifiedName(node.parent) && node !== node.parent.left) {
-                return node;
-            }
-            if (ts.isParameter(node.parent) && node === node.parent.name) {
-                return node;
-            }
-            if (ts.isNamedTupleMember(node.parent) && node === node.parent.name) {
-                return node;
-            }
+	ts.visitEachChild(
+		decl,
+		/** @type {(node: ts.Node) => ts.Node} */ function visit(node) {
+			if (ts.isIdentifier(node) && ts.isPartOfTypeNode(node)) {
+				if (
+					ts.isQualifiedName(node.parent) &&
+					node !== node.parent.left
+				) {
+					return node;
+				}
+				if (ts.isParameter(node.parent) && node === node.parent.name) {
+					return node;
+				}
+				if (
+					ts.isNamedTupleMember(node.parent) &&
+					node === node.parent.name
+				) {
+					return node;
+				}
 
-            const symbolOfNode = typeChecker.getSymbolAtLocation(node);
-            if (!symbolOfNode) {
-                fail(`No symbol for node at ${nodeToLocation(node)}`);
-            }
-            const symbolInScope = findInScope(symbolOfNode.name);
-            if (!symbolInScope) {
-                // We didn't find the symbol in scope at all. Just allow it and we'll fail at test time.
-                return node;
-            }
+				const symbolOfNode = typeChecker.getSymbolAtLocation(node);
+				if (!symbolOfNode) {
+					fail(`No symbol for node at ${nodeToLocation(node)}`);
+				}
+				const symbolInScope = findInScope(symbolOfNode.name);
+				if (!symbolInScope) {
+					// We didn't find the symbol in scope at all. Just allow it and we'll fail at test time.
+					return node;
+				}
 
-            if (symbolsConflict(symbolOfNode, symbolInScope)) {
-                fail(`Declaration at ${nodeToLocation(decl)}\n    references ${symbolOfNode.name} at ${symbolOfNode.declarations && nodeToLocation(symbolOfNode.declarations[0])},\n    but containing scope contains a symbol with the same name declared at ${symbolInScope.declarations && nodeToLocation(symbolInScope.declarations[0])}`);
-            }
-        }
+				if (symbolsConflict(symbolOfNode, symbolInScope)) {
+					fail(
+						`Declaration at ${nodeToLocation(decl)}\n    references ${symbolOfNode.name} at ${symbolOfNode.declarations && nodeToLocation(symbolOfNode.declarations[0])},\n    but containing scope contains a symbol with the same name declared at ${symbolInScope.declarations && nodeToLocation(symbolInScope.declarations[0])}`,
+					);
+				}
+			}
 
-        return ts.visitEachChild(node, visit, /*context*/ undefined);
-    }, /*context*/ undefined);
+			return ts.visitEachChild(node, visit, /*context*/ undefined);
+		},
+		/*context*/ undefined,
+	);
 }
 
 /**
@@ -328,102 +369,125 @@ function verifyMatchingSymbols(decl) {
  * @param {ts.Symbol} moduleSymbol
  */
 function emitAsNamespace(name, moduleSymbol) {
-    assert(moduleSymbol.flags & ts.SymbolFlags.ValueModule, "moduleSymbol is not a module");
+	assert(
+		moduleSymbol.flags & ts.SymbolFlags.ValueModule,
+		"moduleSymbol is not a module",
+	);
 
-    scopeStack.push(new Map());
-    const currentScope = scopeStack[scopeStack.length - 1];
+	scopeStack.push(new Map());
+	const currentScope = scopeStack[scopeStack.length - 1];
 
-    const target = containsPublicAPI(moduleSymbol) ? WriteTarget.Both : WriteTarget.Internal;
+	const target = containsPublicAPI(moduleSymbol)
+		? WriteTarget.Both
+		: WriteTarget.Internal;
 
-    if (name === "ts") {
-        // We will write `export = ts` at the end.
-        write(`declare namespace ${name} {`, target);
-    }
-    else {
-        // No export modifier; we are already in the namespace.
-        write(`namespace ${name} {`, target);
-    }
-    increaseIndent();
+	if (name === "ts") {
+		// We will write `export = ts` at the end.
+		write(`declare namespace ${name} {`, target);
+	} else {
+		// No export modifier; we are already in the namespace.
+		write(`namespace ${name} {`, target);
+	}
+	increaseIndent();
 
-    const moduleExports = typeChecker.getExportsOfModule(moduleSymbol);
-    for (const me of moduleExports) {
-        currentScope.set(me.name, me);
-    }
+	const moduleExports = typeChecker.getExportsOfModule(moduleSymbol);
+	for (const me of moduleExports) {
+		currentScope.set(me.name, me);
+	}
 
-    for (const me of moduleExports) {
-        assert(me.declarations?.length);
+	for (const me of moduleExports) {
+		assert(me.declarations?.length);
 
-        if (me.flags & ts.SymbolFlags.Alias) {
-            const resolved = typeChecker.getAliasedSymbol(me);
-            emitAsNamespace(me.name, resolved);
-            continue;
-        }
+		if (me.flags & ts.SymbolFlags.Alias) {
+			const resolved = typeChecker.getAliasedSymbol(me);
+			emitAsNamespace(me.name, resolved);
+			continue;
+		}
 
-        for (const decl of me.declarations) {
-            const statement = getDeclarationStatement(decl);
-            const sourceFile = decl.getSourceFile();
+		for (const decl of me.declarations) {
+			const statement = getDeclarationStatement(decl);
+			const sourceFile = decl.getSourceFile();
 
-            if (!statement) {
-                fail(`Unhandled declaration for ${me.name} at ${nodeToLocation(decl)}`);
-            }
+			if (!statement) {
+				fail(
+					`Unhandled declaration for ${me.name} at ${nodeToLocation(decl)}`,
+				);
+			}
 
-            verifyMatchingSymbols(statement);
+			verifyMatchingSymbols(statement);
 
-            const isInternal = ts.isInternalDeclaration(statement);
-            if (!isInternal) {
-                const publicStatement = ts.visitEachChild(statement, node => {
-                    // No @internal comments in the public API.
-                    if (ts.isInternalDeclaration(node)) {
-                        return undefined;
-                    }
-                    return removeDeclareConstExport(node);
-                }, /*context*/ undefined);
+			const isInternal = ts.isInternalDeclaration(statement);
+			if (!isInternal) {
+				const publicStatement = ts.visitEachChild(
+					statement,
+					(node) => {
+						// No @internal comments in the public API.
+						if (ts.isInternalDeclaration(node)) {
+							return undefined;
+						}
+						return removeDeclareConstExport(node);
+					},
+					/*context*/ undefined,
+				);
 
-                writeNode(publicStatement, sourceFile, WriteTarget.Public);
-            }
+				writeNode(publicStatement, sourceFile, WriteTarget.Public);
+			}
 
-            const internalStatement = ts.visitEachChild(statement, removeDeclareConstExport, /*context*/ undefined);
+			const internalStatement = ts.visitEachChild(
+				statement,
+				removeDeclareConstExport,
+				/*context*/ undefined,
+			);
 
-            writeNode(internalStatement, sourceFile, WriteTarget.Internal);
-        }
-    }
+			writeNode(internalStatement, sourceFile, WriteTarget.Internal);
+		}
+	}
 
-    scopeStack.pop();
+	scopeStack.pop();
 
-    decreaseIndent();
-    write(`}`, target);
+	decreaseIndent();
+	write(`}`, target);
 }
 
 emitAsNamespace("ts", moduleSymbol);
 
 write("export = ts;", WriteTarget.Both);
 
-const copyrightNotice = fs.readFileSync(path.join(__dirname, "CopyrightNotice.txt"), "utf-8");
+const copyrightNotice = fs.readFileSync(
+	path.join(__dirname, "CopyrightNotice.txt"),
+	"utf-8",
+);
 const publicContents = copyrightNotice + publicLines.join(newLine);
 const internalContents = copyrightNotice + internalLines.join(newLine);
 
 if (publicContents.includes("@internal")) {
-    console.error("Output includes untrimmed @internal nodes!");
+	console.error("Output includes untrimmed @internal nodes!");
 }
 
-const dprintPath = path.resolve(__dirname, "..", "node_modules", "dprint", "bin.js");
+const dprintPath = path.resolve(
+	__dirname,
+	"..",
+	"node_modules",
+	"dprint",
+	"bin.js",
+);
 
 /**
  * @param {string} contents
  * @returns {string}
  */
 function dprint(contents) {
-    const result = cp.execFileSync(
-        process.execPath,
-        [dprintPath, "fmt", "--stdin", "ts"],
-        {
-            stdio: ["pipe", "pipe", "inherit"],
-            encoding: "utf-8",
-            input: contents,
-            maxBuffer: 100 * 1024 * 1024, // 100 MB "ought to be enough for anyone"; https://github.com/nodejs/node/issues/9829
-        },
-    );
-    return result.replace(/\r\n/g, "\n");
+	const result = cp.execFileSync(
+		process.execPath,
+		[dprintPath, "fmt", "--stdin", "ts"],
+		{
+			stdio: ["pipe", "pipe", "inherit"],
+			encoding: "utf-8",
+			input: contents,
+			maxBuffer: 100 * 1024 * 1024, // 100 MB "ought to be enough for anyone"; https://github.com/nodejs/node/issues/9829
+		},
+	);
+	return result.replace(/\r\n/g, "\n");
 }
 
 fs.writeFileSync(output, dprint(publicContents));
